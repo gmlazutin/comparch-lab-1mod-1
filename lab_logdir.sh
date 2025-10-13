@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [ $# -lt 2 ]; then
 	echo "Usage: $0 <log_directory_path> <size>"
 	exit 1
