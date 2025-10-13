@@ -7,7 +7,18 @@ fi
 
 log_dir="$1"
 size="$2"
-N=70
+N=$LROTATE_NEEDED_PERCENTAGE
+
+extended_log() {
+	if [ "$LROTATE_EXTENDED_LOG" = "true" ]; then
+		echo "extendedlog: $1"
+	fi
+}
+
+if [ -z "$N" ]; then
+	N=70
+	extended_log "LROTATE_NEEDED_PERCENTAGE is empty, using default percentage!"
+fi
 
 if [ -z "$log_dir" ]; then
     echo "Path is empty"
@@ -26,7 +37,7 @@ fi
 
 dir_size=$(du -sb "$log_dir" | awk '{print $1}')
 perc=$(( dir_size * 100 / size))
-threshold=$(( N * 100 / size))
+threshold=$(( N * size / 100))
 
 echo "Directory $log_dir takes $perc% of the given size."
 
