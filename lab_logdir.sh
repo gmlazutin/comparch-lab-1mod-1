@@ -54,5 +54,5 @@ echo "Directory $log_dir takes $perc% of the given size."
 if [ "$dir_size" -ge "$threshold" ]; then
 	echo "The usage exceeds the threshold($threshold). Archivation needed."
 else
-	echo "The usage is less then threshold($threshold). No archivation needed."
+	echo "The usage is less than threshold($threshold). No archivation needed."
 fi
