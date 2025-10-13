@@ -1,14 +1,5 @@
 #!/bin/bash
 
-if [ $# -lt 2 ]; then
-	echo "Usage: $0 <log_directory_path> <size>"
-	exit 1
-fi
-
-log_dir="$1"
-size="$2"
-N="${LROTATE_NEEDED_PERCENTAGE:-70}"
-
 is_positive_int() {
 	echo "$1" | grep -qE '^[1-9][0-9]*$'
 }
@@ -19,8 +10,21 @@ extended_log() {
 	fi
 }
 
+if [ $# -lt 2 ]; then
+	echo "Usage: $0 <log_directory_path> <size>"
+	exit 1
+fi
+
+log_dir="$1"
+size="$2"
+N="${LROTATE_NEEDED_PERCENTAGE:-70}"
+
 if [ -z "${LROTATE_NEEDED_PERCENTAGE:-}" ]; then
 	extended_log "LROTATE_NEEDED_PERCENTAGE is empty, using default percentage!"
+fi
+if ! is_positive_int "$N"; then
+	echo "LROTATE_NEEDED_PERCENTAGE must be a positive integer"
+	exit 1
 fi
 
 if ! is_positive_int "$size"; then
@@ -32,12 +36,10 @@ if [ -z "$log_dir" ]; then
     	echo "Path is empty"
     	exit 1
 fi
-
 if [ ! -e "$log_dir" ]; then
     	echo "Path does not exist"
     	exit 1
 fi
-
 if [ ! -d "$log_dir" ]; then
     	echo "Path is not a directory"
     	exit 1
