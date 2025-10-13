@@ -7,16 +7,15 @@ fi
 
 log_dir="$1"
 size="$2"
-N=$LROTATE_NEEDED_PERCENTAGE
+N="${LROTATE_NEEDED_PERCENTAGE:-70}"
 
 extended_log() {
-	if [ "$LROTATE_EXTENDED_LOG" = "true" ]; then
+	if [ "${LROTATE_EXTENDED_LOG:-}" = "true" ]; then
 		echo "extendedlog: $1"
 	fi
 }
 
-if [ -z "$N" ]; then
-	N=70
+if [ -z "${LROTATE_NEEDED_PERCENTAGE:-}" ]; then
 	extended_log "LROTATE_NEEDED_PERCENTAGE is empty, using default percentage!"
 fi
 
