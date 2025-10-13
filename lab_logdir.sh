@@ -9,6 +9,10 @@ log_dir="$1"
 size="$2"
 N="${LROTATE_NEEDED_PERCENTAGE:-70}"
 
+is_positive_int() {
+	echo "$1" | grep -qE '^[1-9][0-9]*$'
+}
+
 extended_log() {
 	if [ "${LROTATE_EXTENDED_LOG:-}" = "true" ]; then
 		echo "extendedlog: $1"
@@ -19,19 +23,24 @@ if [ -z "${LROTATE_NEEDED_PERCENTAGE:-}" ]; then
 	extended_log "LROTATE_NEEDED_PERCENTAGE is empty, using default percentage!"
 fi
 
+if ! is_positive_int "$size"; then
+	echo "Size must be positive integer"
+	exit 1
+fi
+
 if [ -z "$log_dir" ]; then
-    echo "Path is empty"
-    exit 2
+    	echo "Path is empty"
+    	exit 1
 fi
 
 if [ ! -e "$log_dir" ]; then
-    echo "Path does not exist"
-    exit 3
+    	echo "Path does not exist"
+    	exit 1
 fi
 
 if [ ! -d "$log_dir" ]; then
-    echo "Path is not a directory"
-    exit 4
+    	echo "Path is not a directory"
+    	exit 1
 fi
 
 dir_size=$(du -sb "$log_dir" | awk '{print $1}')
