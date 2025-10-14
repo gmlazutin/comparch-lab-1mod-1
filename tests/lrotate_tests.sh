@@ -1,11 +1,11 @@
 #!/bin/bash
 SCRIPT="./lrotate.sh"
-WORKDIR="./.test_lrotate_dir"
+WORKDIR="./.test_lab_dir"
 TESTDIR="$WORKDIR/test_dir"
 TMPFILE="$WORKDIR/_tmp_output.txt"
 
 if [ ! -f "$SCRIPT" ]; then
-  echo "$SCRIPT not found"
+  echo "lrotate.sh not found"
   exit 2
 fi
 
@@ -56,6 +56,7 @@ run_test "Test 5: zero as size" "$TESTDIR" 0
 # 6. Empty path
 expected="Path is empty"
 run_test "Test 6: empty path" "" 1000
+
 # 7. Non-existent path
 expected="Path does not exist"
 run_test "Test 7: non-existent path" "/fake/path" 1000
@@ -74,10 +75,11 @@ expected="No archivation needed"
 run_test "Test 9: directory smaller than threshold" "$TESTDIR" 100000
 
 # 10. Folder exceeds threshold
+rm -rf "$TESTDIR"
 mkdir -p "$TESTDIR"
 dd if=/dev/zero of="$TESTDIR/bigfile" bs=1024 count=80 &>/dev/null
 expected="Archivation needed"
-run_test "Test 10: directory exceeds threshold" "$TESTDIR" 100000
+run_test "Test 10: directory exceeds threshold" "$TESTDIR" 1000  # уменьшил size, чтобы реально превышало
 
 # 11. Folder size exactly equals threshold (>=)
 rm -rf "$TESTDIR"
@@ -86,13 +88,16 @@ dd if=/dev/zero of="$TESTDIR/exact" bs=1 count=5000 &>/dev/null
 export LROTATE_NEEDED_PERCENTAGE=50
 expected="Archivation needed"
 run_test "Test 11: size equals threshold" "$TESTDIR" 10000
+unset LROTATE_NEEDED_PERCENTAGE
 
 # 12. Extended log message when env var unset
 rm -rf "$TESTDIR"
 mkdir -p "$TESTDIR"
 export LROTATE_EXTENDED_LOG=true
+unset LROTATE_NEEDED_PERCENTAGE
 expected="extendedlog: LROTATE_NEEDED_PERCENTAGE is empty, using default percentage!"
 run_test "Test 12: extended log message shown" "$TESTDIR" 1000
+unset LROTATE_EXTENDED_LOG
 
 # 13. Valid custom percentage = 90 (no archivation)
 rm -rf "$TESTDIR"
@@ -107,7 +112,6 @@ unset LROTATE_NEEDED_PERCENTAGE
 export LROTATE_NEEDED_PERCENTAGE=-5
 expected="LROTATE_NEEDED_PERCENTAGE must be a positive integer"
 run_test "Test 14: negative percentage value" "$TESTDIR" 2000
-unset LROTATE_NEEDED_PERCENTAGE
 
 # 15. Check that archived files are correct
 TESTDIR=$(mktemp -d)
@@ -134,8 +138,6 @@ fi
 
 rm -rf extracted
 echo "Test 15 passed!"
-rm -rf "$TESTDIR"
-
 
 # 16. Check that old logs are deleted after archiving
 TESTDIR=$(mktemp -d)
