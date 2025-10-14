@@ -1,11 +1,11 @@
 #!/bin/bash
 SCRIPT="./lrotate.sh"
-WORKDIR="./.test_lab_dir"
+WORKDIR="./.test_lrotate"
 TESTDIR="$WORKDIR/test_dir"
 TMPFILE="$WORKDIR/_tmp_output.txt"
 
 if [ ! -f "$SCRIPT" ]; then
-  echo "lrotate.sh not found"
+  echo "$SCRIPT not found"
   exit 2
 fi
 
