@@ -1,11 +1,11 @@
 #!/bin/bash
-SCRIPT="./lab_logdir.sh"
-WORKDIR="./.test_lab_dir"
+SCRIPT="./lrotate.sh"
+WORKDIR="./.test_lrotate_dir"
 TESTDIR="$WORKDIR/test_dir"
 TMPFILE="$WORKDIR/_tmp_output.txt"
 
 if [ ! -f "$SCRIPT" ]; then
-  echo "lab_logdir.sh not found"
+  echo "$SCRIPT not found"
   exit 2
 fi
 
