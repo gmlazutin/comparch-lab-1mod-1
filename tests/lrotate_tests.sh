@@ -109,9 +109,62 @@ expected="LROTATE_NEEDED_PERCENTAGE must be a positive integer"
 run_test "Test 14: negative percentage value" "$TESTDIR" 2000
 unset LROTATE_NEEDED_PERCENTAGE
 
-rm -rf "$WORKDIR"
-rm -f "$TMPFILE"unset LROTATE_EXTENDED_LOG
-unset LROTATE_NEEDED_PERCENTAGE
-unset LROTATE_NEEDED_PERCENTAGE
+# 15. Check that archived files are correct
+TESTDIR=$(mktemp -d)
+echo "log1" > "$TESTDIR/log1.txt"
+echo "log2" > "$TESTDIR/log2.txt"
+expected=""
+run_test "Test 15: archive contains all original files" "$TESTDIR" 2000
+
+# Find created archive
+archive_file=$(ls "$TESTDIR"/*.tar.gz 2>/dev/null | head -n 1)
+if [ -z "$archive_file" ]; then
+  echo "Test 15 failed: archive file not found!"
+  exit 1
+fi
+
+# Extract archive and check contents
+mkdir -p extracted
+tar -xzf "$archive_file" -C extracted
+if [ ! -f extracted/log1.txt ] || [ ! -f extracted/log2.txt ]; then
+  echo "Test 15 failed: archive does not contain all original files!"
+  rm -rf extracted "$TESTDIR"
+  exit 1
+fi
+
+rm -rf extracted
+echo "Test 15 passed!"
 rm -rf "$TESTDIR"
+
+
+# 16. Check that old logs are deleted after archiving
+TESTDIR=$(mktemp -d)
+echo "aaa" > "$TESTDIR/a.log"
+echo "bbb" > "$TESTDIR/b.log"
+expected=""
+run_test "Test 16: old log files deleted after archiving" "$TESTDIR" 2000
+
+# Verify that .log files are deleted
+remaining_logs=$(find "$TESTDIR" -type f -name "*.log" | wc -l)
+if [ "$remaining_logs" -ne 0 ]; then
+  echo "Test 16 failed: old log files were not deleted!"
+  rm -rf "$TESTDIR"
+  exit 1
+fi
+
+# Verify that archive exists
+archive_count=$(find "$TESTDIR" -type f -name "*.tar.gz" | wc -l)
+if [ "$archive_count" -eq 0 ]; then
+  echo "Test 16 failed: archive not created!"
+  rm -rf "$TESTDIR"
+  exit 1
+fi
+
+echo "Test 16 passed!"
+rm -rf "$TESTDIR"
+
+rm -rf "$WORKDIR"
+rm -f "$TMPFILE"
+unset LROTATE_EXTENDED_LOG
+unset LROTATE_NEEDED_PERCENTAGE
 
