@@ -53,6 +53,39 @@ echo "Directory $log_dir takes $perc% of the given size."
 
 if [ "$dir_size" -ge "$threshold" ]; then
 	echo "The usage exceeds the threshold($threshold). Archivation needed."
+
+	tmp_sz="$dir_size"
+	files=""
+	current_wd=$(pwd)
+	if ! mkdir -p "backup"; then
+		echo "unable to create backup folder"
+		exit 1
+	fi
+	cd "$log_dir"
+	for file in $(ls -tr); do
+		if [ ! -f "$file" ]; then
+			extended_log "\"$file\" is not a file. Skipping..."
+			continue
+		fi
+	        files="$files$file "
+	        tmp_sz=$((tmp_sz - $(stat --printf="%s" "$file")))
+	        if [ "$tmp_sz" -le "$threshold" ]; then
+	                break
+	        fi
+	done
+
+	extended_log "files to be archived: $files"
+	if tar -czf "$current_wd/backup/backup_$(date "+%Y%m%d_%H%M%S").tar.gz" $files; then
+		extended_log "files archived. Removing originals..."
+		if ! rm $files; then
+			echo "unable to remove original files"
+			exit 1
+		fi
+	else
+		echo "unable to create archive"
+		exit 1
+	fi
+	cd "$current_wd"
 else
 	echo "The usage is less than threshold($threshold). No archivation needed."
 fi
