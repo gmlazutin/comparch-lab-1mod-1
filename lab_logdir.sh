@@ -75,7 +75,8 @@ if [ "$dir_size" -ge "$threshold" ]; then
 	done
 
 	extended_log "files to be archived: $files"
-	if tar -czf "$current_wd/backup/backup_$(date "+%Y%m%d_%H%M%S").tar.gz" $files; then
+	backup_name="backup_$(date "+%Y%m%d_%H%M%S").tar.gz"
+	if tar -czf "$current_wd/backup/$backup_name" $files; then
 		extended_log "files archived. Removing originals..."
 		if ! rm $files; then
 			echo "unable to remove original files"
@@ -85,6 +86,7 @@ if [ "$dir_size" -ge "$threshold" ]; then
 		echo "unable to create archive"
 		exit 1
 	fi
+	echo "Backup \"$backup_name\" created."
 	cd "$current_wd"
 else
 	echo "The usage is less than threshold($threshold). No archivation needed."
