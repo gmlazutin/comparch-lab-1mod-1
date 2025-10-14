@@ -1,5 +1,5 @@
 #!/bin/bash
-SCRIPT="./lrotate.sh"
+SCRIPT="$(pwd)/lrotate.sh"
 WORKDIR="./.test_lrotate"
 TESTDIR="$WORKDIR/test_dir"
 TMPFILE="$WORKDIR/_tmp_output.txt"
@@ -65,7 +65,8 @@ run_test "Test 7: non-existent path" "/fake/path" 1000
 mkdir -p "$TESTDIR"
 echo "data" >"$TESTDIR/file"
 expected="Path is not a directory"
-run_test "Test 8: path is a file" "$TESTDIR/file" 1000
+touch "$TESTDIR/testfile.txt"  # создаем файл явно
+run_test "Test 8: path is a file" "$TESTDIR/testfile.txt" 1000
 
 # 9. Folder smaller than threshold
 rm -rf "$TESTDIR"
@@ -77,17 +78,17 @@ run_test "Test 9: directory smaller than threshold" "$TESTDIR" 100000
 # 10. Folder exceeds threshold
 rm -rf "$TESTDIR"
 mkdir -p "$TESTDIR"
-dd if=/dev/zero of="$TESTDIR/bigfile" bs=1024 count=80 &>/dev/null
+dd if=/dev/zero of="$TESTDIR/bigfile" bs=1024 count=100 &>/dev/null
 expected="Archivation needed"
-run_test "Test 10: directory exceeds threshold" "$TESTDIR" 1000  # уменьшил size, чтобы реально превышало
+run_test "Test 10: directory exceeds threshold" "$TESTDIR" 100  
 
 # 11. Folder size exactly equals threshold (>=)
 rm -rf "$TESTDIR"
 mkdir -p "$TESTDIR"
-dd if=/dev/zero of="$TESTDIR/exact" bs=1 count=5000 &>/dev/null
-export LROTATE_NEEDED_PERCENTAGE=50
+dd if=/dev/zero of="$TESTDIR/exact" bs=1024 count=1 &>/dev/null
+export LROTATE_NEEDED_PERCENTAGE=10
 expected="Archivation needed"
-run_test "Test 11: size equals threshold" "$TESTDIR" 10000
+run_test "Test 11: size equals threshold" "$TESTDIR" 10240
 unset LROTATE_NEEDED_PERCENTAGE
 
 # 12. Extended log message when env var unset
@@ -114,11 +115,13 @@ expected="LROTATE_NEEDED_PERCENTAGE must be a positive integer"
 run_test "Test 14: negative percentage value" "$TESTDIR" 2000
 
 # 15. Check that archived files are correct
-TESTDIR=$(mktemp -d)
-echo "log1" > "$TESTDIR/log1.txt"
-echo "log2" > "$TESTDIR/log2.txt"
-expected=""
-run_test "Test 15: archive contains all original files" "$TESTDIR" 2000
+TESTDIR15=$(mktemp -d)
+echo "log1" > "$TESTDIR15/log1.txt"
+echo "log2" > "$TESTDIR15/log2.txt"
+dd if=/dev/zero of="$TESTDIR15/biglog1.txt" bs=1024 count=1024 &>/dev/null
+dd if=/dev/zero of="$TESTDIR15/biglog2.txt" bs=1024 count=1024 &>/dev/null
+
+run_test "Test 15: archive contains all original files" "$TESTDIR15" 100  
 
 # Find created archive
 archive_file=$(ls "$TESTDIR"/*.tar.gz 2>/dev/null | head -n 1)
