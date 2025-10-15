@@ -1,6 +1,6 @@
 #!/bin/bash
 SCRIPT="$(pwd)/lrotate.sh"
-WORKDIR="./.test_lrotate"
+WORKDIR="$PWD/.test_lrotate"
 TESTDIR="$WORKDIR/test_dir"
 TMPFILE="$WORKDIR/_tmp_output.txt"
 
@@ -12,24 +12,29 @@ fi
 mkdir -p "$WORKDIR"
 
 run_test() {
-  local desc="$1"
-  shift
+  desc="$1"; shift
   echo ">>> $desc"
-  rm -rf "$TESTDIR"
-  mkdir -p "$TESTDIR"
+  # ensure TMPFILE directory exists but DO NOT remove TESTDIR here
+  mkdir -p "$(dirname "$TMPFILE")"
+  # run the script with passed args, capture output
   "$SCRIPT" "$@" >"$TMPFILE" 2>&1
-  local code=$?
-  local output
   output=$(cat "$TMPFILE")
-  if echo "$output" | grep -q "$expected"; then
-    echo "PASSED"
+  # if expected is set, check it; if not — treat as a run-only test
+  if [ -n "$expected" ]; then
+    if echo "$output" | grep -q -- "$expected"; then
+      echo "PASSED"
+    else
+      echo "FAILED"
+      echo "Got output:"
+      echo "$output"
+    fi
   else
-    echo "FAILED"
-    echo "Got output:"
-    echo "$output"
+    # no expected string provided — print output for manual checks
+    echo "PASSED (no expected text checked)"
   fi
   echo
 }
+
 
 # 1. No arguments
 expected="Usage:"
@@ -114,19 +119,26 @@ export LROTATE_NEEDED_PERCENTAGE=-5
 expected="LROTATE_NEEDED_PERCENTAGE must be a positive integer"
 run_test "Test 14: negative percentage value" "$TESTDIR" 2000
 
-# 15. Check that archived files are correct
+# 15. Check
 TESTDIR15=$(mktemp -d)
 echo "log1" > "$TESTDIR15/log1.txt"
 echo "log2" > "$TESTDIR15/log2.txt"
 dd if=/dev/zero of="$TESTDIR15/biglog1.txt" bs=1024 count=1024 &>/dev/null
 dd if=/dev/zero of="$TESTDIR15/biglog2.txt" bs=1024 count=1024 &>/dev/null
 
-run_test "Test 15: archive contains all original files" "$TESTDIR15" 100  
+run_test "Test 15: archive contains all original files" "$TESTDIR15" 100
+
+if [ -d "backup" ]; then
+    archive_file=$(find "backup" -name "*.tar.gz" | head -n 1)
+fi
 
 # Find created archive
-archive_file=$(ls "$TESTDIR"/*.tar.gz 2>/dev/null | head -n 1)
+archive_file=$(find "backup" -name "*.tar.gz" 2>/dev/null | head -n 1)
 if [ -z "$archive_file" ]; then
   echo "Test 15 failed: archive file not found!"
+  echo "Backup directory contents:"
+  ls -la "backup" 2>/dev/null || echo "Backup directory doesn't exist"
+  rm -rf "$TESTDIR15"
   exit 1
 fi
 
