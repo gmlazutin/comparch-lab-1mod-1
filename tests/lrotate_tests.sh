@@ -14,12 +14,9 @@ mkdir -p "$WORKDIR"
 run_test() {
   desc="$1"; shift
   echo ">>> $desc"
-  # ensure TMPFILE directory exists but DO NOT remove TESTDIR here
   mkdir -p "$(dirname "$TMPFILE")"
-  # run the script with passed args, capture output
   "$SCRIPT" "$@" >"$TMPFILE" 2>&1
   output=$(cat "$TMPFILE")
-  # if expected is set, check it; if not — treat as a run-only test
   if [ -n "$expected" ]; then
     if echo "$output" | grep -q -- "$expected"; then
       echo "PASSED"
@@ -29,7 +26,6 @@ run_test() {
       echo "$output"
     fi
   else
-    # no expected string provided — print output for manual checks
     echo "PASSED (no expected text checked)"
   fi
   echo
@@ -70,7 +66,7 @@ run_test "Test 7: non-existent path" "/fake/path" 1000
 mkdir -p "$TESTDIR"
 echo "data" >"$TESTDIR/file"
 expected="Path is not a directory"
-touch "$TESTDIR/testfile.txt"  # создаем файл явно
+touch "$TESTDIR/testfile.txt"
 run_test "Test 8: path is a file" "$TESTDIR/testfile.txt" 1000
 
 # 9. Folder smaller than threshold
@@ -119,7 +115,7 @@ export LROTATE_NEEDED_PERCENTAGE=-5
 expected="LROTATE_NEEDED_PERCENTAGE must be a positive integer"
 run_test "Test 14: negative percentage value" "$TESTDIR" 2000
 
-# 15. Check
+# 15. Check archive files
 TESTDIR15=$(mktemp -d)
 echo "log1" > "$TESTDIR15/log1.txt"
 echo "log2" > "$TESTDIR15/log2.txt"
