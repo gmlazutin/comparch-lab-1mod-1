@@ -41,7 +41,7 @@ if [ ! -d "$log_dir" ]; then
     exit 1
 fi
 
-dir_size=$(du -sb "$log_dir" | awk '{print $1}')
+dir_size=$(find "$log_dir" -maxdepth 1 -type f -printf "%s\n" | awk 'BEGIN {sum=0} {sum+=$1} END {print sum}')
 perc=$(( dir_size * 100 / size))
 threshold=$(( N * size / 100))
 
