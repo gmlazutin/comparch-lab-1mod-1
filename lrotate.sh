@@ -67,7 +67,7 @@ elif [ "$dir_size" -ge "$threshold" ]; then
         fi
         files="$files$file "
         tmp_sz=$((tmp_sz - $(stat --printf="%s" "$file")))
-        if [ "$tmp_sz" -le "$threshold" ]; then
+        if [ "$tmp_sz" -lt "$threshold" ]; then
             break
         fi
     done
