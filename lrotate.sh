@@ -36,12 +36,8 @@ if [ -z "$log_dir" ]; then
     echo "Path is empty"
     exit 1
 fi
-if [ ! -e "$log_dir" ]; then
-    echo "Path does not exist"
-    exit 1
-fi
 if [ ! -d "$log_dir" ]; then
-    echo "Path is not a directory"
+    echo "Path does not exist or it is not a directory"
     exit 1
 fi
 
