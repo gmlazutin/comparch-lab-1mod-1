@@ -47,7 +47,9 @@ threshold=$(( N * size / 100))
 
 echo "Directory $log_dir takes $perc% of the given size."
 
-if [ "$dir_size" -ge "$threshold" ]; then
+if [ "$dir_size" -eq 0 ]; then
+    echo "The folder is empty. No archivation needed."
+elif [ "$dir_size" -ge "$threshold" ]; then
     echo "The usage exceeds the threshold($threshold). Archivation needed."
 
     tmp_sz="$dir_size"
