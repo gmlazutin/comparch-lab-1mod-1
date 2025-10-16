@@ -1,5 +1,5 @@
 param(
-    [ValidateScript({ (Test-Path $_) -and (Get-Item $_).PSIsContainer })]
+    [ValidateScript({ Test-Path -Path $_ -PathType Container })]
     [Parameter(Mandatory, Position=0)]
     [string]$LogDir,
 
@@ -43,7 +43,7 @@ if ($dirSize -lt $threshold) {
 Write-Output "The usage exceeds the threshold($threshold). Archivation needed."
 
 $backupDir = Join-Path (Get-Location) "backup"
-if (-not (Test-Path $backupDir)) {
+if (-not (Test-Path -Path $backupDir -PathType Container)) {
     New-Item $backupDir -ItemType Directory | Out-Null
 }
 
