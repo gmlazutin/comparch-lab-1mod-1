@@ -144,7 +144,7 @@ init_test
 dd if=/dev/zero of="$TESTDIR/biglog1.txt" bs=1024 count=1 &>/dev/null
 dd if=/dev/zero of="$TESTDIR/biglog2.txt" bs=1024 count=1 &>/dev/null
 sleep 0.5
-dd if=/dev/zero of="$TESTDIR/biglog3.txt" bs=1024 count=2 &>/dev/null
+dd if=/dev/zero of="$TESTDIR/biglog3.txt" bs=1024 count=1 &>/dev/null
 
 export LROTATE_NEEDED_PERCENTAGE=50
 run_test "" "Test 16: check archive files and logs folder" "$TESTDIR" 4096
