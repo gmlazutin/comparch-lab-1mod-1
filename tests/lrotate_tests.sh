@@ -95,7 +95,7 @@ unset LROTATE_EXTENDED_LOG
 # 13. Valid custom percentage = 90 (no archivation)
 rm -rf "$TESTDIR"
 mkdir -p "$TESTDIR"
-dd if=/dev/zero of="$TESTDIR/small" bs=1024 count=1 &>/dev/null
+dd if=/dev/zero of="$TESTDIR/small" bs=1500 count=1 &>/dev/null
 export LROTATE_NEEDED_PERCENTAGE=90
 run_test "No archivation needed" "Test 13: custom percentage = 90%" "$TESTDIR" 2000
 unset LROTATE_NEEDED_PERCENTAGE
